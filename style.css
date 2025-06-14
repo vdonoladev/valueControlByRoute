@@ -38,11 +38,9 @@ body {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 70%);
   animation: shimmer 4s ease-in-out infinite alternate;
 }
 
@@ -199,7 +197,8 @@ h1 {
 }
 
 .clear-btn,
-.export-btn {
+.export-btn,
+.resumo-btn {
   background: #dc3545;
   color: white;
   border: none;
@@ -209,10 +208,15 @@ h1 {
   font-size: 14px;
   font-weight: bold;
   transition: background 0.3s ease;
+  margin: 5px;
 }
 
 .export-btn {
   background: #28a745;
+}
+
+.resumo-btn {
+  background: #17a2b8;
 }
 
 .clear-btn:hover {
@@ -221,6 +225,10 @@ h1 {
 
 .export-btn:hover {
   background: #218838;
+}
+
+.resumo-btn:hover {
+  background: #138496;
 }
 
 .valores-list {
@@ -252,6 +260,201 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Estilos do Modal de Resumo */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background-color: white;
+  margin: 5% auto;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 900px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.close-modal {
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #999;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.close-modal:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.resumo-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #007bff;
+}
+
+.resumo-title {
+  font-size: 1.8em;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.resumo-subtitle {
+  color: #666;
+  font-size: 1em;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card.green {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.stat-card.orange {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.stat-card.purple {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  color: #333;
+}
+
+.stat-value {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 0.9em;
+  opacity: 0.9;
+}
+
+.rotas-resumo {
+  margin-top: 30px;
+}
+
+.rotas-resumo h3 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.3em;
+  text-align: center;
+}
+
+.rota-resumo-item {
+  background: #f8f9fa;
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #28a745;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rota-resumo-item.destaque {
+  background: #fff3cd;
+  border-left-color: #ffc107;
+}
+
+.rota-resumo-info {
+  flex: 1;
+}
+
+.rota-resumo-nome {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.rota-resumo-detalhes {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.rota-resumo-total {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.total-geral-resumo {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 25px;
+  margin-top: 30px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.total-geral-resumo h3 {
+  margin-bottom: 10px;
+  font-size: 1.3em;
+}
+
+.total-geral-valor {
+  font-size: 2em;
+  font-weight: bold;
 }
 
 .footer {

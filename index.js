@@ -28,7 +28,7 @@ function inicializar() {
                     <div class="rota-nome">${rota}</div>
                     <div class="valores-container">
                         <div class="valores-list" id="valores-${index}"></div>
-                        <input type="text" class="valor-input" placeholder="0,00" 
+                        <input type="text" class="valor-input" placeholder="1.234,56" 
                                onkeypress="if(event.key==='Enter') adicionarValor('${rota}', ${index}, this)"
                                oninput="formatarMoeda(this)">
                         <button class="btn-add-valor" onclick="adicionarValor('${rota}', ${index}, this.previousElementSibling)">+</button>
@@ -100,8 +100,8 @@ function atualizarRota(rota, index) {
     valorTag.className = "valor-tag";
     valorTag.innerHTML = `
                     R$ ${valor.toLocaleString("pt-BR", {
-      minimumFractionDigits: 2,
-    })}
+                      minimumFractionDigits: 2,
+                    })}
                     <button class="remove-valor" onclick="removerValor('${rota}', ${index}, ${valorIndex})">×</button>
                 `;
     valoresContainer.appendChild(valorTag);
@@ -125,6 +125,151 @@ function atualizarTotal() {
     minimumFractionDigits: 2,
   })}`;
 }
+
+function gerarResumo() {
+  const totalGeral = Object.values(dadosRotas)
+    .flat()
+    .reduce((sum, valor) => sum + valor, 0);
+  const rotasComValores = rotas.filter((rota) => dadosRotas[rota].length > 0);
+  const totalValores = Object.values(dadosRotas).flat().length;
+
+  if (totalValores === 0) {
+    alert(
+      "⚠️ Não há dados para gerar o resumo!\n\nAdicione alguns valores primeiro."
+    );
+    return;
+  }
+
+  // Calcular estatísticas
+  const rotaComMaiorValor = calcularRotaComMaiorValor();
+  const mediaGeral = totalGeral / totalValores;
+  const dataAtual = new Date().toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  let resumoHTML = `
+                <div class="resumo-header">
+                    <h2 class="resumo-title">📊 Relatório Detalhado de Rotas</h2>
+                    <p class="resumo-subtitle">Gerado em: ${dataAtual}</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">R$ ${totalGeral.toLocaleString(
+                          "pt-BR",
+                          { minimumFractionDigits: 2 }
+                        )}</div>
+                        <div class="stat-label">Total Geral</div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-value">${rotasComValores.length}</div>
+                        <div class="stat-label">Rotas Ativas</div>
+                    </div>
+                    <div class="stat-card orange">
+                        <div class="stat-value">${totalValores}</div>
+                        <div class="stat-label">Total de Valores</div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-value">R$ ${mediaGeral.toLocaleString(
+                          "pt-BR",
+                          { minimumFractionDigits: 2 }
+                        )}</div>
+                        <div class="stat-label">Média por Valor</div>
+                    </div>
+                </div>
+
+                <div class="rotas-resumo">
+                    <h3>📋 Detalhamento por Rota</h3>
+            `;
+
+  // Ordenar rotas por total (maior para menor)
+  const rotasOrdenadas = rotasComValores.sort((a, b) => {
+    const totalA = dadosRotas[a].reduce((sum, valor) => sum + valor, 0);
+    const totalB = dadosRotas[b].reduce((sum, valor) => sum + valor, 0);
+    return totalB - totalA;
+  });
+
+  rotasOrdenadas.forEach((rota, index) => {
+    const valores = dadosRotas[rota];
+    const totalRota = valores.reduce((sum, valor) => sum + valor, 0);
+    const mediaRota = totalRota / valores.length;
+    const percentualDoTotal = (totalRota / totalGeral) * 100;
+
+    const isDestaque = rota === rotaComMaiorValor;
+    const classeDestaque = isDestaque ? "destaque" : "";
+
+    resumoHTML += `
+                    <div class="rota-resumo-item ${classeDestaque}">
+                        <div class="rota-resumo-info">
+                            <div class="rota-resumo-nome">
+                                ${isDestaque ? "🏆 " : ""}${rota}
+                                ${isDestaque ? " (Maior Total)" : ""}
+                            </div>
+                            <div class="rota-resumo-detalhes">
+                                ${valores.length} valor${
+      valores.length > 1 ? "es" : ""
+    } • 
+                                Média: R$ ${mediaRota.toLocaleString("pt-BR", {
+                                  minimumFractionDigits: 2,
+                                })} • 
+                                ${percentualDoTotal.toFixed(1)}% do total
+                            </div>
+                        </div>
+                        <div class="rota-resumo-total">
+                            R$ ${totalRota.toLocaleString("pt-BR", {
+                              minimumFractionDigits: 2,
+                            })}
+                        </div>
+                    </div>
+                `;
+  });
+
+  resumoHTML += `
+                </div>
+
+                <div class="total-geral-resumo">
+                    <h3>💰 VALOR TOTAL CONSOLIDADO</h3>
+                    <div class="total-geral-valor">R$ ${totalGeral.toLocaleString(
+                      "pt-BR",
+                      { minimumFractionDigits: 2 }
+                    )}</div>
+                </div>
+            `;
+
+  document.getElementById("conteudo-resumo").innerHTML = resumoHTML;
+  document.getElementById("modal-resumo").style.display = "block";
+}
+
+function calcularRotaComMaiorValor() {
+  let maiorTotal = 0;
+  let rotaComMaiorTotal = "";
+
+  rotas.forEach((rota) => {
+    const totalRota = dadosRotas[rota].reduce((sum, valor) => sum + valor, 0);
+    if (totalRota > maiorTotal) {
+      maiorTotal = totalRota;
+      rotaComMaiorTotal = rota;
+    }
+  });
+
+  return rotaComMaiorTotal;
+}
+
+function fecharResumo() {
+  document.getElementById("modal-resumo").style.display = "none";
+}
+
+// Fechar modal clicando fora dele
+window.onclick = function (event) {
+  const modal = document.getElementById("modal-resumo");
+  if (event.target === modal) {
+    fecharResumo();
+  }
+};
 
 function exportarCSV() {
   // Cabeçalho do CSV
@@ -155,9 +300,7 @@ function exportarCSV() {
         // Só mostra o total da rota na primeira linha de cada rota
         const totalParaExibir = index === 0 ? totalRotaFormatado : "";
 
-        linhasDetalhadas.push(
-          `${rota};${valorFormatado};${totalParaExibir}`
-        );
+        linhasDetalhadas.push(`${rota};${valorFormatado};${totalParaExibir}`);
       });
 
       // Resumo das rotas
