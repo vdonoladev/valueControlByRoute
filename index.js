@@ -28,7 +28,7 @@ function inicializar() {
                     <div class="rota-nome">${rota}</div>
                     <div class="valores-container">
                         <div class="valores-list" id="valores-${index}"></div>
-                        <input type="text" class="valor-input" placeholder="1.234,56" 
+                        <input type="text" class="valor-input" placeholder="0,00" 
                                onkeypress="if(event.key==='Enter') adicionarValor('${rota}', ${index}, this)"
                                oninput="formatarMoeda(this)">
                         <button class="btn-add-valor" onclick="adicionarValor('${rota}', ${index}, this.previousElementSibling)">+</button>
@@ -100,8 +100,8 @@ function atualizarRota(rota, index) {
     valorTag.className = "valor-tag";
     valorTag.innerHTML = `
                     R$ ${valor.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                    })}
+      minimumFractionDigits: 2,
+    })}
                     <button class="remove-valor" onclick="removerValor('${rota}', ${index}, ${valorIndex})">×</button>
                 `;
     valoresContainer.appendChild(valorTag);
@@ -160,9 +160,9 @@ function gerarResumo() {
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-value">R$ ${totalGeral.toLocaleString(
-                          "pt-BR",
-                          { minimumFractionDigits: 2 }
-                        )}</div>
+    "pt-BR",
+    { minimumFractionDigits: 2 }
+  )}</div>
                         <div class="stat-label">Total Geral</div>
                     </div>
                     <div class="stat-card green">
@@ -175,9 +175,9 @@ function gerarResumo() {
                     </div>
                     <div class="stat-card purple">
                         <div class="stat-value">R$ ${mediaGeral.toLocaleString(
-                          "pt-BR",
-                          { minimumFractionDigits: 2 }
-                        )}</div>
+    "pt-BR",
+    { minimumFractionDigits: 2 }
+  )}</div>
                         <div class="stat-label">Média por Valor</div>
                     </div>
                 </div>
@@ -210,19 +210,18 @@ function gerarResumo() {
                                 ${isDestaque ? " (Maior Total)" : ""}
                             </div>
                             <div class="rota-resumo-detalhes">
-                                ${valores.length} valor${
-      valores.length > 1 ? "es" : ""
-    } • 
+                                ${valores.length} valor${valores.length > 1 ? "es" : ""
+      } • 
                                 Média: R$ ${mediaRota.toLocaleString("pt-BR", {
-                                  minimumFractionDigits: 2,
-                                })} • 
+        minimumFractionDigits: 2,
+      })} • 
                                 ${percentualDoTotal.toFixed(1)}% do total
                             </div>
                         </div>
                         <div class="rota-resumo-total">
                             R$ ${totalRota.toLocaleString("pt-BR", {
-                              minimumFractionDigits: 2,
-                            })}
+        minimumFractionDigits: 2,
+      })}
                         </div>
                     </div>
                 `;
@@ -234,9 +233,9 @@ function gerarResumo() {
                 <div class="total-geral-resumo">
                     <h3>💰 VALOR TOTAL CONSOLIDADO</h3>
                     <div class="total-geral-valor">R$ ${totalGeral.toLocaleString(
-                      "pt-BR",
-                      { minimumFractionDigits: 2 }
-                    )}</div>
+    "pt-BR",
+    { minimumFractionDigits: 2 }
+  )}</div>
                 </div>
             `;
 
