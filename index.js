@@ -130,7 +130,9 @@ function gerarResumo() {
   const totalGeral = Object.values(dadosRotas)
     .flat()
     .reduce((sum, valor) => sum + valor, 0);
-  const rotasComValores = rotas.filter((rota) => dadosRotas[rota].length > 0);
+  const rotasComValores = rotas.filter(
+    (rota) => dadosRotas[rota].length > 0
+  );
   const totalValores = Object.values(dadosRotas).flat().length;
 
   if (totalValores === 0) {
@@ -248,7 +250,10 @@ function calcularRotaComMaiorValor() {
   let rotaComMaiorTotal = "";
 
   rotas.forEach((rota) => {
-    const totalRota = dadosRotas[rota].reduce((sum, valor) => sum + valor, 0);
+    const totalRota = dadosRotas[rota].reduce(
+      (sum, valor) => sum + valor,
+      0
+    );
     if (totalRota > maiorTotal) {
       maiorTotal = totalRota;
       rotaComMaiorTotal = rota;
@@ -299,7 +304,9 @@ function exportarCSV() {
         // Só mostra o total da rota na primeira linha de cada rota
         const totalParaExibir = index === 0 ? totalRotaFormatado : "";
 
-        linhasDetalhadas.push(`${rota};${valorFormatado};${totalParaExibir}`);
+        linhasDetalhadas.push(
+          `${rota};${valorFormatado};${totalParaExibir}`
+        );
       });
 
       // Resumo das rotas
@@ -366,3 +373,66 @@ function limparTudo() {
 
 // Inicializar ao carregar a página
 document.addEventListener("DOMContentLoaded", inicializar);
+
+function distribuirPorBancos() {
+  const nomes = document.querySelectorAll(".banco-nome");
+  const limites = document.querySelectorAll(".banco-limite");
+  const totalGeral = Object.values(dadosRotas)
+    .flat()
+    .reduce((sum, val) => sum + val, 0);
+
+  let bancos = [];
+
+  for (let i = 0; i < nomes.length; i++) {
+    const nome = nomes[i].value.trim();
+    const limiteStr = limites[i].value.trim();
+    if (nome && limiteStr) {
+      const limite = converterParaNumero(limiteStr);
+      bancos.push({ nome, limite, alocado: 0 });
+    }
+  }
+
+  if (bancos.length === 0) {
+    alert("⚠️ Insira pelo menos um banco com limite válido.");
+    return;
+  }
+
+  // Distribuir proporcionalmente
+  let restante = totalGeral;
+  const margem = 0.03; // até 3% a mais permitido
+
+  for (let i = 0; i < bancos.length; i++) {
+    if (restante <= 0) break;
+    const maximo = bancos[i].limite * (1 + margem);
+    const alocar = Math.min(restante, maximo);
+    bancos[i].alocado = alocar;
+    restante -= alocar;
+  }
+
+  let resultadoHTML = `<h3 style="margin-bottom: 20px;">💸 Resultado da Distribuição</h3>`;
+  resultadoHTML += `<p>Total Geral: <strong>R$ ${totalGeral.toLocaleString(
+    "pt-BR",
+    { minimumFractionDigits: 2 }
+  )}</strong></p>`;
+  resultadoHTML += `<ul style="list-style: none; padding: 0; margin-top: 20px;">`;
+
+  bancos.forEach((banco) => {
+    resultadoHTML += `<li style="margin: 10px 0;">🔹 <strong>${banco.nome
+      }</strong>: R$ ${banco.alocado.toLocaleString("pt-BR", {
+        minimumFractionDigits: 2,
+      })} (${((banco.alocado / totalGeral) * 100).toFixed(1)}%)</li>`;
+  });
+
+  resultadoHTML += `</ul>`;
+
+  if (restante > 0.01) {
+    resultadoHTML += `<p style="color: red; margin-top: 15px;">⚠️ Valor restante não alocado: <strong>R$ ${restante.toLocaleString(
+      "pt-BR",
+      { minimumFractionDigits: 2 }
+    )}</strong></p>`;
+  } else {
+    resultadoHTML += `<p style="color: green; margin-top: 15px;">✅ Distribuição concluída com sucesso!</p>`;
+  }
+
+  document.getElementById("resultado-bancos").innerHTML = resultadoHTML;
+}
