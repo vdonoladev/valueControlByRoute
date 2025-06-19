@@ -2,7 +2,7 @@
 const BANCOS = ["2G", "LECCA", "ITAÚ", "GRAFENO", "PIX", "LECCA - MG"];
 
 // Dados dos pedidos, organizados por nome do banco/categoria
-let dadosBancos = {}; // Alterado de dadosRotas para dadosBancos
+let dadosBancos = {};
 
 // Inicializa a aplicação ao carregar a página
 document.addEventListener("DOMContentLoaded", inicializar);
@@ -27,7 +27,11 @@ function inicializar() {
   // Atualizar a UI para refletir os pedidos carregados para cada banco
   BANCOS.forEach((banco) => {
     const safeBancoId = banco.replace(/[^a-zA-Z0-9]/g, ""); // Para IDs HTML
-    atualizarBancoUI(banco, `pedidos-${safeBancoId}`, `total-${safeBancoId}`);
+    atualizarBancoUI(
+      banco,
+      `pedidos-${safeBancoId}`,
+      `total-${safeBancoId}`
+    );
   });
 
   atualizarTotaisGerais();
@@ -84,7 +88,9 @@ function adicionarPedido(bancoNome, pedidoInputId, valorInputId) {
     return;
   }
   if (!valor || valor <= 0) {
-    alert("⚠️ Por favor, informe um valor monetário válido e maior que zero!");
+    alert(
+      "⚠️ Por favor, informe um valor monetário válido e maior que zero!"
+    );
     valorInput.focus();
     return;
   }
@@ -110,7 +116,11 @@ function adicionarPedido(bancoNome, pedidoInputId, valorInputId) {
   pedidoInput.focus();
 
   const safeBancoId = bancoNome.replace(/[^a-zA-Z0-9]/g, "");
-  atualizarBancoUI(bancoNome, `pedidos-${safeBancoId}`, `total-${safeBancoId}`);
+  atualizarBancoUI(
+    bancoNome,
+    `pedidos-${safeBancoId}`,
+    `total-${safeBancoId}`
+  );
   atualizarTotaisGerais();
 }
 
@@ -122,7 +132,10 @@ function adicionarPedido(bancoNome, pedidoInputId, valorInputId) {
 function removerPedido(bancoNome, pedidoIndex) {
   if (confirm("Tem certeza que deseja remover este pedido?")) {
     if (!dadosBancos[bancoNome]) {
-      console.error("Banco não encontrado para remover pedido:", bancoNome);
+      console.error(
+        "Banco não encontrado para remover pedido:",
+        bancoNome
+      );
       return;
     }
     dadosBancos[bancoNome].splice(pedidoIndex, 1);
@@ -166,15 +179,18 @@ function atualizarBancoUI(bancoNome, pedidosListId, totalElementId) {
     pedidoDiv.innerHTML = `
                   <span class="pedido-numero">📋 ${pedido.numero}</span>
                   <span class="pedido-valor">R$ ${pedido.valor.toLocaleString(
-                    "pt-BR",
-                    { minimumFractionDigits: 2 }
-                  )}</span>
+      "pt-BR",
+      { minimumFractionDigits: 2 }
+    )}</span>
                   ${removerBtnHtml}
               `;
     pedidosContainer.appendChild(pedidoDiv);
   });
 
-  const total = pedidosDoBanco.reduce((sum, pedido) => sum + pedido.valor, 0);
+  const total = pedidosDoBanco.reduce(
+    (sum, pedido) => sum + pedido.valor,
+    0
+  );
   totalElement.textContent = `TOTAL ${bancoNome.toUpperCase()}: R$ ${total.toLocaleString(
     "pt-BR",
     { minimumFractionDigits: 2 }
@@ -200,116 +216,6 @@ function atualizarTotaisGerais() {
 }
 
 /**
- * Gera e exibe o resumo completo dos valores em um modal.
- */
-function gerarResumo() {
-  const modal = document.getElementById("modal-resumo");
-  const conteudo = document.getElementById("conteudo-resumo");
-
-  let html = `
-              <div class="resumo-header">
-                  <div class="resumo-title">📊 RESUMO COMPLETO DE VALORES</div>
-                  <div class="resumo-subtitle">Controle de Pagamentos por Banco - De Paulo Pães</div>
-              </div>
-
-              <div class="logo-print">
-                  <h2>🌾 DE PAULO PÃES</h2>
-                  <p>Controle de Valores por Banco</p>
-              </div>
-          `;
-
-  let hasPedidos = false;
-  BANCOS.forEach((banco) => {
-    const pedidosDoBanco = dadosBancos[banco] || [];
-    const totalDoBanco = pedidosDoBanco.reduce(
-      (sum, pedido) => sum + pedido.valor,
-      0
-    );
-
-    // Adiciona a seção do banco apenas se houver pedidos para ele
-    if (pedidosDoBanco.length > 0) {
-      hasPedidos = true;
-      const safeBancoId = banco.replace(/[^a-zA-Z0-9]/g, "");
-      html += `
-                    <div class="resumo-secao banco-${safeBancoId.toLowerCase()}">
-                        <h3>🏦 ${banco.toUpperCase()}</h3>
-                        <div class="rota-resumo-item">
-                            <div class="rota-resumo-nome">Pedidos do ${banco}</div>
-                            <div class="pedidos-resumo">
-                `;
-      pedidosDoBanco.forEach((pedido) => {
-        html += `
-                                <div class="pedido-resumo-item">
-                                    <span class="pedido-resumo-numero">📋 Pedido: ${
-                                      pedido.numero
-                                    }</span>
-                                    <span class="pedido-resumo-valor">R$ ${pedido.valor.toLocaleString(
-                                      "pt-BR",
-                                      { minimumFractionDigits: 2 }
-                                    )}</span>
-                                </div>
-                    `;
-      });
-      html += `
-                            </div>
-                            <div class="total-rota">
-                                TOTAL ${banco.toUpperCase()}: R$ ${totalDoBanco.toLocaleString(
-        "pt-BR",
-        { minimumFractionDigits: 2 }
-      )}
-                            </div>
-                        </div>
-                    </div>
-                `;
-    }
-  });
-
-  const totalGeralFinal = BANCOS.reduce(
-    (sum, banco) =>
-      sum +
-      (dadosBancos[banco]
-        ? dadosBancos[banco].reduce((s, p) => s + p.valor, 0)
-        : 0),
-    0
-  );
-
-  if (hasPedidos) {
-    html += `
-                <div class="total-geral-resumo">
-                    <h3>💰 TOTAL GERAL</h3>
-                    <div class="total-geral-valor">R$ ${totalGeralFinal.toLocaleString(
-                      "pt-BR",
-                      { minimumFractionDigits: 2 }
-                    )}</div>
-                </div>
-            `;
-  } else {
-    html = `
-                <div class="resumo-header">
-                    <div class="resumo-title">📊 RESUMO COMPLETO</div>
-                    <div class="resumo-subtitle">Nenhum pedido cadastrado ainda</div>
-                </div>
-                <div style="text-align: center; padding: 50px; color: #666; font-size: 1.2em;">
-                    <p>🚫 Não há pedidos cadastrados para gerar o resumo.</p>
-                    <p>Adicione alguns pedidos nos bancos para visualizar o resumo completo.</p>
-                </div>
-            `;
-  }
-
-  html += `<button class="btn-print-resumo" onclick="window.print()">🖨️ Imprimir Resumo</button>`;
-
-  conteudo.innerHTML = html;
-  modal.style.display = "block";
-}
-
-/**
- * Fecha o modal de resumo.
- */
-function fecharResumo() {
-  document.getElementById("modal-resumo").style.display = "none";
-}
-
-/**
  * Exporta os dados atuais para um arquivo CSV.
  */
 function exportarCSV() {
@@ -327,7 +233,9 @@ function exportarCSV() {
   });
 
   if (!hasData) {
-    alert("⚠️ Não há dados para exportar. Adicione alguns pedidos primeiro!");
+    alert(
+      "⚠️ Não há dados para exportar. Adicione alguns pedidos primeiro!"
+    );
     return;
   }
 
@@ -362,7 +270,11 @@ function limparTudo() {
 
     BANCOS.forEach((banco) => {
       const safeBancoId = banco.replace(/[^a-zA-Z0-9]/g, "");
-      atualizarBancoUI(banco, `pedidos-${safeBancoId}`, `total-${safeBancoId}`);
+      atualizarBancoUI(
+        banco,
+        `pedidos-${safeBancoId}`,
+        `total-${safeBancoId}`
+      );
     });
 
     atualizarTotaisGerais();
@@ -370,11 +282,3 @@ function limparTudo() {
     alert("✅ Todos os dados foram limpos com sucesso!");
   }
 }
-
-// Fechar modal ao clicar fora
-window.onclick = function (event) {
-  const modal = document.getElementById("modal-resumo");
-  if (event.target === modal) {
-    fecharResumo();
-  }
-};
