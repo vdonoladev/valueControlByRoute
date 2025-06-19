@@ -1,61 +1,52 @@
-const rotas = [
-  "Zona Sul (Mercado)",
-  "Pix",
-  "Zona Sul",
-  "Metropolitana",
-  "Serrana",
-  "Zona Oeste",
-  "Médio Paraíba",
-  "Norte Fluminense",
-  "Região dos Lagos",
-  "Baixada",
-  "Minas Gerais",
-  "Costa Verde",
-  "Centro Sul",
-];
+// Lista de todos os bancos/categorias
+const BANCOS = ["2G", "LECCA", "ITAÚ", "GRAFENO", "PIX", "LECCA - MG"];
 
-let dadosRotas = {};
+// Dados dos pedidos, organizados por nome do banco/categoria
+let dadosBancos = {}; // Alterado de dadosRotas para dadosBancos
 
+// Inicializa a aplicação ao carregar a página
+document.addEventListener("DOMContentLoaded", inicializar);
+
+/**
+ * Inicializa os dados dos bancos e carrega pedidos do localStorage.
+ */
 function inicializar() {
-  const container = document.getElementById("rotas-container");
-
-  rotas.forEach((rota, index) => {
-    dadosRotas[rota] = [];
-
-    const rotaDiv = document.createElement("div");
-    rotaDiv.className = "rota-item";
-    rotaDiv.innerHTML = `
-                    <div class="rota-nome">${rota}</div>
-                    <div class="valores-container">
-                        <div class="valores-list" id="valores-${index}"></div>
-                        <input type="text" class="valor-input" placeholder="0,00" 
-                               onkeypress="if(event.key==='Enter') adicionarValor('${rota}', ${index}, this)"
-                               oninput="formatarMoeda(this)">
-                        <button class="btn-add-valor" onclick="adicionarValor('${rota}', ${index}, this.previousElementSibling)">+</button>
-                        <div class="total-rota" id="total-${index}">R$ 0,00</div>
-                    </div>
-                `;
-
-    container.appendChild(rotaDiv);
+  // Inicializar dados para cada banco se não existirem no localStorage
+  BANCOS.forEach((banco) => {
+    if (!dadosBancos[banco]) {
+      dadosBancos[banco] = [];
+    }
   });
+
+  // Carregar pedidos do localStorage
+  const savedOrders = localStorage.getItem("dadosBancos");
+  if (savedOrders) {
+    dadosBancos = JSON.parse(savedOrders);
+  }
+
+  // Atualizar a UI para refletir os pedidos carregados para cada banco
+  BANCOS.forEach((banco) => {
+    const safeBancoId = banco.replace(/[^a-zA-Z0-9]/g, ""); // Para IDs HTML
+    atualizarBancoUI(banco, `pedidos-${safeBancoId}`, `total-${safeBancoId}`);
+  });
+
+  atualizarTotaisGerais();
 }
 
+/**
+ * Formata o valor de um input para o padrão de moeda brasileira (R$).
+ * @param {HTMLInputElement} input - O elemento input a ser formatado.
+ */
 function formatarMoeda(input) {
   let valor = input.value;
+  valor = valor.replace(/\D/g, ""); // Remove tudo que não é dígito
 
-  // Remove tudo que não é número
-  valor = valor.replace(/\D/g, "");
-
-  // Se vazio, não faz nada
   if (valor === "") {
     input.value = "";
     return;
   }
 
-  // Converte para número e adiciona zeros se necessário
   valor = parseInt(valor);
-
-  // Formata como moeda brasileira
   valor = (valor / 100).toLocaleString("pt-BR", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -64,60 +55,142 @@ function formatarMoeda(input) {
   input.value = valor;
 }
 
+/**
+ * Converte uma string formatada como moeda brasileira para um número float.
+ * @param {string} valorFormatado - A string do valor formatado (ex: "1.234,56").
+ * @returns {number} O valor numérico.
+ */
 function converterParaNumero(valorFormatado) {
-  // Remove pontos e substitui vírgula por ponto
+  if (!valorFormatado) return 0;
   return parseFloat(valorFormatado.replace(/\./g, "").replace(",", "."));
 }
 
-function adicionarValor(rota, index, input) {
-  const valorFormatado = input.value;
-  const valor = converterParaNumero(valorFormatado);
+/**
+ * Adiciona um novo pedido a um banco específico.
+ * @param {string} bancoNome - O nome do banco/categoria.
+ * @param {string} pedidoInputId - ID do campo de input do número do pedido.
+ * @param {string} valorInputId - ID do campo de input do valor.
+ */
+function adicionarPedido(bancoNome, pedidoInputId, valorInputId) {
+  const pedidoInput = document.getElementById(pedidoInputId);
+  const valorInput = document.getElementById(valorInputId);
 
-  if (valor && valor > 0) {
-    dadosRotas[rota].push(valor);
-    input.value = "";
-    atualizarRota(rota, index);
-    atualizarTotal();
+  const numeroPedido = pedidoInput.value.trim();
+  const valor = converterParaNumero(valorInput.value);
+
+  if (!numeroPedido) {
+    alert("⚠️ Por favor, informe o número do pedido!");
+    pedidoInput.focus();
+    return;
+  }
+  if (!valor || valor <= 0) {
+    alert("⚠️ Por favor, informe um valor monetário válido e maior que zero!");
+    valorInput.focus();
+    return;
+  }
+
+  if (!dadosBancos[bancoNome]) {
+    dadosBancos[bancoNome] = [];
+  }
+  if (dadosBancos[bancoNome].some((p) => p.numero === numeroPedido)) {
+    alert(
+      `⚠️ Este número de pedido (${numeroPedido}) já foi adicionado para o banco "${bancoNome}"!`
+    );
+    return;
+  }
+
+  dadosBancos[bancoNome].push({
+    numero: numeroPedido,
+    valor: valor,
+  });
+  localStorage.setItem("dadosBancos", JSON.stringify(dadosBancos)); // Salvar dados atualizados
+
+  pedidoInput.value = "";
+  valorInput.value = "";
+  pedidoInput.focus();
+
+  const safeBancoId = bancoNome.replace(/[^a-zA-Z0-9]/g, "");
+  atualizarBancoUI(bancoNome, `pedidos-${safeBancoId}`, `total-${safeBancoId}`);
+  atualizarTotaisGerais();
+}
+
+/**
+ * Remove um pedido de um banco específico.
+ * @param {string} bancoNome - O nome do banco/categoria.
+ * @param {number} pedidoIndex - O índice do pedido a ser removido.
+ */
+function removerPedido(bancoNome, pedidoIndex) {
+  if (confirm("Tem certeza que deseja remover este pedido?")) {
+    if (!dadosBancos[bancoNome]) {
+      console.error("Banco não encontrado para remover pedido:", bancoNome);
+      return;
+    }
+    dadosBancos[bancoNome].splice(pedidoIndex, 1);
+    localStorage.setItem("dadosBancos", JSON.stringify(dadosBancos)); // Salvar dados atualizados
+
+    const safeBancoId = bancoNome.replace(/[^a-zA-Z0-9]/g, "");
+    atualizarBancoUI(
+      bancoNome,
+      `pedidos-${safeBancoId}`,
+      `total-${safeBancoId}`
+    );
+    atualizarTotaisGerais();
   }
 }
 
-function removerValor(rota, index, valorIndex) {
-  dadosRotas[rota].splice(valorIndex, 1);
-  atualizarRota(rota, index);
-  atualizarTotal();
-}
+/**
+ * Atualiza a exibição dos pedidos e o total de um banco específico na UI.
+ * @param {string} bancoNome - O nome do banco/categoria.
+ * @param {string} pedidosListId - ID do container dos pedidos na UI.
+ * @param {string} totalElementId - ID do elemento que mostra o total do banco.
+ */
+function atualizarBancoUI(bancoNome, pedidosListId, totalElementId) {
+  const pedidosContainer = document.getElementById(pedidosListId);
+  const totalElement = document.getElementById(totalElementId);
 
-function atualizarRota(rota, index) {
-  const valoresContainer = document.getElementById(`valores-${index}`);
-  const totalElement = document.getElementById(`total-${index}`);
+  if (!pedidosContainer || !totalElement) {
+    console.warn(
+      `Elementos UI não encontrados para banco: ${bancoNome}, ids: ${pedidosListId}, ${totalElementId}`
+    );
+    return;
+  }
 
-  // Limpar valores existentes
-  valoresContainer.innerHTML = "";
+  pedidosContainer.innerHTML = ""; // Limpar pedidos existentes
 
-  // Adicionar valores como tags
-  dadosRotas[rota].forEach((valor, valorIndex) => {
-    const valorTag = document.createElement("div");
-    valorTag.className = "valor-tag";
-    valorTag.innerHTML = `
-                    R$ ${valor.toLocaleString("pt-BR", {
-      minimumFractionDigits: 2,
-    })}
-                    <button class="remove-valor" onclick="removerValor('${rota}', ${index}, ${valorIndex})">×</button>
-                `;
-    valoresContainer.appendChild(valorTag);
+  const pedidosDoBanco = dadosBancos[bancoNome] || [];
+
+  pedidosDoBanco.forEach((pedido, pedidoIndex) => {
+    const pedidoDiv = document.createElement("div");
+    pedidoDiv.className = "pedido-item";
+    const removerBtnHtml = `<button class="remove-pedido" onclick="removerPedido('${bancoNome}', ${pedidoIndex})" title="Remover pedido">×</button>`;
+    pedidoDiv.innerHTML = `
+                  <span class="pedido-numero">📋 ${pedido.numero}</span>
+                  <span class="pedido-valor">R$ ${pedido.valor.toLocaleString(
+                    "pt-BR",
+                    { minimumFractionDigits: 2 }
+                  )}</span>
+                  ${removerBtnHtml}
+              `;
+    pedidosContainer.appendChild(pedidoDiv);
   });
 
-  // Atualizar total da rota
-  const total = dadosRotas[rota].reduce((sum, valor) => sum + valor, 0);
-  totalElement.textContent = `R$ ${total.toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-  })}`;
+  const total = pedidosDoBanco.reduce((sum, pedido) => sum + pedido.valor, 0);
+  totalElement.textContent = `TOTAL ${bancoNome.toUpperCase()}: R$ ${total.toLocaleString(
+    "pt-BR",
+    { minimumFractionDigits: 2 }
+  )}`;
 }
 
-function atualizarTotal() {
-  const totalGeral = Object.values(dadosRotas)
-    .flat()
-    .reduce((sum, valor) => sum + valor, 0);
+/**
+ * Atualiza o total geral de todos os bancos/categorias na interface.
+ */
+function atualizarTotaisGerais() {
+  let totalGeral = 0;
+  BANCOS.forEach((banco) => {
+    totalGeral += dadosBancos[banco]
+      ? dadosBancos[banco].reduce((sum, pedido) => sum + pedido.valor, 0)
+      : 0;
+  });
 
   document.getElementById(
     "total-final"
@@ -126,313 +199,182 @@ function atualizarTotal() {
   })}`;
 }
 
+/**
+ * Gera e exibe o resumo completo dos valores em um modal.
+ */
 function gerarResumo() {
-  const totalGeral = Object.values(dadosRotas)
-    .flat()
-    .reduce((sum, valor) => sum + valor, 0);
-  const rotasComValores = rotas.filter(
-    (rota) => dadosRotas[rota].length > 0
-  );
-  const totalValores = Object.values(dadosRotas).flat().length;
+  const modal = document.getElementById("modal-resumo");
+  const conteudo = document.getElementById("conteudo-resumo");
 
-  if (totalValores === 0) {
-    alert(
-      "⚠️ Não há dados para gerar o resumo!\n\nAdicione alguns valores primeiro."
+  let html = `
+              <div class="resumo-header">
+                  <div class="resumo-title">📊 RESUMO COMPLETO DE VALORES</div>
+                  <div class="resumo-subtitle">Controle de Pagamentos por Banco - De Paulo Pães</div>
+              </div>
+
+              <div class="logo-print">
+                  <h2>🌾 DE PAULO PÃES</h2>
+                  <p>Controle de Valores por Banco</p>
+              </div>
+          `;
+
+  let hasPedidos = false;
+  BANCOS.forEach((banco) => {
+    const pedidosDoBanco = dadosBancos[banco] || [];
+    const totalDoBanco = pedidosDoBanco.reduce(
+      (sum, pedido) => sum + pedido.valor,
+      0
     );
-    return;
-  }
 
-  // Calcular estatísticas
-  const rotaComMaiorValor = calcularRotaComMaiorValor();
-  const mediaGeral = totalGeral / totalValores;
-  const dataAtual = new Date().toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  let resumoHTML = `
-                <div class="resumo-header">
-                    <h2 class="resumo-title">📊 Relatório Detalhado de Rotas</h2>
-                    <p class="resumo-subtitle">Gerado em: ${dataAtual}</p>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value">R$ ${totalGeral.toLocaleString(
-    "pt-BR",
-    { minimumFractionDigits: 2 }
-  )}</div>
-                        <div class="stat-label">Total Geral</div>
-                    </div>
-                    <div class="stat-card green">
-                        <div class="stat-value">${rotasComValores.length}</div>
-                        <div class="stat-label">Rotas Ativas</div>
-                    </div>
-                    <div class="stat-card orange">
-                        <div class="stat-value">${totalValores}</div>
-                        <div class="stat-label">Total de Valores</div>
-                    </div>
-                    <div class="stat-card purple">
-                        <div class="stat-value">R$ ${mediaGeral.toLocaleString(
-    "pt-BR",
-    { minimumFractionDigits: 2 }
-  )}</div>
-                        <div class="stat-label">Média por Valor</div>
-                    </div>
-                </div>
-
-                <div class="rotas-resumo">
-                    <h3>📋 Detalhamento por Rota</h3>
-            `;
-
-  // Ordenar rotas por total (maior para menor)
-  const rotasOrdenadas = rotasComValores.sort((a, b) => {
-    const totalA = dadosRotas[a].reduce((sum, valor) => sum + valor, 0);
-    const totalB = dadosRotas[b].reduce((sum, valor) => sum + valor, 0);
-    return totalB - totalA;
-  });
-
-  rotasOrdenadas.forEach((rota, index) => {
-    const valores = dadosRotas[rota];
-    const totalRota = valores.reduce((sum, valor) => sum + valor, 0);
-    const mediaRota = totalRota / valores.length;
-    const percentualDoTotal = (totalRota / totalGeral) * 100;
-
-    const isDestaque = rota === rotaComMaiorValor;
-    const classeDestaque = isDestaque ? "destaque" : "";
-
-    resumoHTML += `
-                    <div class="rota-resumo-item ${classeDestaque}">
-                        <div class="rota-resumo-info">
-                            <div class="rota-resumo-nome">
-                                ${isDestaque ? "🏆 " : ""}${rota}
-                                ${isDestaque ? " (Maior Total)" : ""}
+    // Adiciona a seção do banco apenas se houver pedidos para ele
+    if (pedidosDoBanco.length > 0) {
+      hasPedidos = true;
+      const safeBancoId = banco.replace(/[^a-zA-Z0-9]/g, "");
+      html += `
+                    <div class="resumo-secao banco-${safeBancoId.toLowerCase()}">
+                        <h3>🏦 ${banco.toUpperCase()}</h3>
+                        <div class="rota-resumo-item">
+                            <div class="rota-resumo-nome">Pedidos do ${banco}</div>
+                            <div class="pedidos-resumo">
+                `;
+      pedidosDoBanco.forEach((pedido) => {
+        html += `
+                                <div class="pedido-resumo-item">
+                                    <span class="pedido-resumo-numero">📋 Pedido: ${
+                                      pedido.numero
+                                    }</span>
+                                    <span class="pedido-resumo-valor">R$ ${pedido.valor.toLocaleString(
+                                      "pt-BR",
+                                      { minimumFractionDigits: 2 }
+                                    )}</span>
+                                </div>
+                    `;
+      });
+      html += `
                             </div>
-                            <div class="rota-resumo-detalhes">
-                                ${valores.length} valor${valores.length > 1 ? "es" : ""
-      } • 
-                                Média: R$ ${mediaRota.toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-      })} • 
-                                ${percentualDoTotal.toFixed(1)}% do total
+                            <div class="total-rota">
+                                TOTAL ${banco.toUpperCase()}: R$ ${totalDoBanco.toLocaleString(
+        "pt-BR",
+        { minimumFractionDigits: 2 }
+      )}
                             </div>
-                        </div>
-                        <div class="rota-resumo-total">
-                            R$ ${totalRota.toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-      })}
                         </div>
                     </div>
                 `;
-  });
-
-  resumoHTML += `
-                </div>
-
-                <div class="total-geral-resumo">
-                    <h3>💰 VALOR TOTAL CONSOLIDADO</h3>
-                    <div class="total-geral-valor">R$ ${totalGeral.toLocaleString(
-    "pt-BR",
-    { minimumFractionDigits: 2 }
-  )}</div>
-                </div>
-            `;
-
-  document.getElementById("conteudo-resumo").innerHTML = resumoHTML;
-  document.getElementById("modal-resumo").style.display = "block";
-}
-
-function calcularRotaComMaiorValor() {
-  let maiorTotal = 0;
-  let rotaComMaiorTotal = "";
-
-  rotas.forEach((rota) => {
-    const totalRota = dadosRotas[rota].reduce(
-      (sum, valor) => sum + valor,
-      0
-    );
-    if (totalRota > maiorTotal) {
-      maiorTotal = totalRota;
-      rotaComMaiorTotal = rota;
     }
   });
 
-  return rotaComMaiorTotal;
+  const totalGeralFinal = BANCOS.reduce(
+    (sum, banco) =>
+      sum +
+      (dadosBancos[banco]
+        ? dadosBancos[banco].reduce((s, p) => s + p.valor, 0)
+        : 0),
+    0
+  );
+
+  if (hasPedidos) {
+    html += `
+                <div class="total-geral-resumo">
+                    <h3>💰 TOTAL GERAL</h3>
+                    <div class="total-geral-valor">R$ ${totalGeralFinal.toLocaleString(
+                      "pt-BR",
+                      { minimumFractionDigits: 2 }
+                    )}</div>
+                </div>
+            `;
+  } else {
+    html = `
+                <div class="resumo-header">
+                    <div class="resumo-title">📊 RESUMO COMPLETO</div>
+                    <div class="resumo-subtitle">Nenhum pedido cadastrado ainda</div>
+                </div>
+                <div style="text-align: center; padding: 50px; color: #666; font-size: 1.2em;">
+                    <p>🚫 Não há pedidos cadastrados para gerar o resumo.</p>
+                    <p>Adicione alguns pedidos nos bancos para visualizar o resumo completo.</p>
+                </div>
+            `;
+  }
+
+  html += `<button class="btn-print-resumo" onclick="window.print()">🖨️ Imprimir Resumo</button>`;
+
+  conteudo.innerHTML = html;
+  modal.style.display = "block";
 }
 
+/**
+ * Fecha o modal de resumo.
+ */
 function fecharResumo() {
   document.getElementById("modal-resumo").style.display = "none";
 }
 
-// Fechar modal clicando fora dele
+/**
+ * Exporta os dados atuais para um arquivo CSV.
+ */
+function exportarCSV() {
+  let csv = "Banco,Numero_Pedido,Valor\n";
+
+  let hasData = false;
+  BANCOS.forEach((banco) => {
+    const pedidosDoBanco = dadosBancos[banco] || [];
+    pedidosDoBanco.forEach((pedido) => {
+      csv += `"${banco}","${pedido.numero}","${pedido.valor
+        .toFixed(2)
+        .replace(".", ",")}"\n`;
+      hasData = true;
+    });
+  });
+
+  if (!hasData) {
+    alert("⚠️ Não há dados para exportar. Adicione alguns pedidos primeiro!");
+    return;
+  }
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute(
+    "download",
+    `controle_bancos_${new Date().toISOString().split("T")[0]}.csv`
+  );
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  alert("✅ Dados exportados com sucesso para CSV!");
+}
+
+/**
+ * Limpa todos os dados dos bancos e atualiza a interface.
+ */
+function limparTudo() {
+  if (
+    confirm(
+      "⚠️ Tem certeza que deseja limpar todos os dados?\n\nEsta ação não pode ser desfeita e removerá todos os pedidos de todos os bancos!"
+    )
+  ) {
+    BANCOS.forEach((banco) => {
+      dadosBancos[banco] = [];
+    });
+    localStorage.removeItem("dadosBancos");
+
+    BANCOS.forEach((banco) => {
+      const safeBancoId = banco.replace(/[^a-zA-Z0-9]/g, "");
+      atualizarBancoUI(banco, `pedidos-${safeBancoId}`, `total-${safeBancoId}`);
+    });
+
+    atualizarTotaisGerais();
+
+    alert("✅ Todos os dados foram limpos com sucesso!");
+  }
+}
+
+// Fechar modal ao clicar fora
 window.onclick = function (event) {
   const modal = document.getElementById("modal-resumo");
   if (event.target === modal) {
     fecharResumo();
   }
 };
-
-function exportarCSV() {
-  // Cabeçalho do CSV
-  let csv = "Rota;Valor Individual;Total da Rota\n";
-
-  let totalGeral = 0;
-  let linhasDetalhadas = [];
-  let resumoRotas = [];
-
-  rotas.forEach((rota) => {
-    const valores = dadosRotas[rota];
-    const totalRota = valores.reduce((sum, valor) => sum + valor, 0);
-    totalGeral += totalRota;
-
-    if (valores.length > 0) {
-      // Adiciona cada valor individual
-      valores.forEach((valor, index) => {
-        const valorFormatado = valor.toLocaleString("pt-BR", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        });
-
-        const totalRotaFormatado = totalRota.toLocaleString("pt-BR", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        });
-
-        // Só mostra o total da rota na primeira linha de cada rota
-        const totalParaExibir = index === 0 ? totalRotaFormatado : "";
-
-        linhasDetalhadas.push(
-          `${rota};${valorFormatado};${totalParaExibir}`
-        );
-      });
-
-      // Resumo das rotas
-      const totalRotaFormatado = totalRota.toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      });
-      resumoRotas.push(
-        `${rota};${valores.length} valores;${totalRotaFormatado}`
-      );
-    }
-  });
-
-  // Monta o CSV final
-  csv += linhasDetalhadas.join("\n");
-  csv += "\n\n--- RESUMO POR ROTA ---\n";
-  csv += "Rota;Quantidade de Valores;Total da Rota\n";
-  csv += resumoRotas.join("\n");
-
-  // Total geral
-  const totalGeralFormatado = totalGeral.toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-  csv += `\n\n--- TOTAL GERAL ---\n`;
-  csv += `TOTAL;${totalGeralFormatado};\n`;
-
-  // Data atual
-  const dataAtual = new Date().toLocaleDateString("pt-BR");
-  csv += `\nExportado em: ${dataAtual}`;
-
-  // Download do arquivo
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-
-  if (link.download !== undefined) {
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute(
-      "download",
-      `valores_por_rota_${dataAtual.replace(/\//g, "-")}.csv`
-    );
-    link.style.visibility = "hidden";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-}
-
-function limparTudo() {
-  if (
-    confirm(
-      "⚠️ ATENÇÃO: Isso irá apagar TODOS os valores de TODAS as rotas!\n\nTem certeza que deseja continuar?"
-    )
-  ) {
-    rotas.forEach((rota, index) => {
-      dadosRotas[rota] = [];
-      atualizarRota(rota, index);
-    });
-    atualizarTotal();
-    alert("✅ Todos os valores foram removidos!");
-  }
-}
-
-// Inicializar ao carregar a página
-document.addEventListener("DOMContentLoaded", inicializar);
-
-function distribuirPorBancos() {
-  const nomes = document.querySelectorAll(".banco-nome");
-  const limites = document.querySelectorAll(".banco-limite");
-  const totalGeral = Object.values(dadosRotas)
-    .flat()
-    .reduce((sum, val) => sum + val, 0);
-
-  let bancos = [];
-
-  for (let i = 0; i < nomes.length; i++) {
-    const nome = nomes[i].value.trim();
-    const limiteStr = limites[i].value.trim();
-    if (nome && limiteStr) {
-      const limite = converterParaNumero(limiteStr);
-      bancos.push({ nome, limite, alocado: 0 });
-    }
-  }
-
-  if (bancos.length === 0) {
-    alert("⚠️ Insira pelo menos um banco com limite válido.");
-    return;
-  }
-
-  // Distribuir proporcionalmente
-  let restante = totalGeral;
-  const margem = 0.03; // até 3% a mais permitido
-
-  for (let i = 0; i < bancos.length; i++) {
-    if (restante <= 0) break;
-    const maximo = bancos[i].limite * (1 + margem);
-    const alocar = Math.min(restante, maximo);
-    bancos[i].alocado = alocar;
-    restante -= alocar;
-  }
-
-  let resultadoHTML = `<h3 style="margin-bottom: 20px;">💸 Resultado da Distribuição</h3>`;
-  resultadoHTML += `<p>Total Geral: <strong>R$ ${totalGeral.toLocaleString(
-    "pt-BR",
-    { minimumFractionDigits: 2 }
-  )}</strong></p>`;
-  resultadoHTML += `<ul style="list-style: none; padding: 0; margin-top: 20px;">`;
-
-  bancos.forEach((banco) => {
-    resultadoHTML += `<li style="margin: 10px 0;">🔹 <strong>${banco.nome
-      }</strong>: R$ ${banco.alocado.toLocaleString("pt-BR", {
-        minimumFractionDigits: 2,
-      })} (${((banco.alocado / totalGeral) * 100).toFixed(1)}%)</li>`;
-  });
-
-  resultadoHTML += `</ul>`;
-
-  if (restante > 0.01) {
-    resultadoHTML += `<p style="color: red; margin-top: 15px;">⚠️ Valor restante não alocado: <strong>R$ ${restante.toLocaleString(
-      "pt-BR",
-      { minimumFractionDigits: 2 }
-    )}</strong></p>`;
-  } else {
-    resultadoHTML += `<p style="color: green; margin-top: 15px;">✅ Distribuição concluída com sucesso!</p>`;
-  }
-
-  document.getElementById("resultado-bancos").innerHTML = resultadoHTML;
-}

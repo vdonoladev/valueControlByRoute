@@ -11,7 +11,7 @@ body {
 }
 
 .container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   background: white;
   border-radius: 10px;
@@ -24,7 +24,10 @@ body {
   text-align: center;
   margin-bottom: 30px;
   padding: 25px;
-  background: linear-gradient(135deg, #8b4513 0%, #a0522d 50%, #cd853f 100%);
+  background: linear-gradient(135deg,
+      #8b4513 0%,
+      #a0522d 50%,
+      #cd853f 100%);
   border-radius: 15px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   position: relative;
@@ -38,11 +41,9 @@ body {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 70%
-  );
+  background: radial-gradient(circle,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 70%);
   animation: shimmer 4s ease-in-out infinite alternate;
 }
 
@@ -103,6 +104,7 @@ body {
     transform: rotate(0deg);
     opacity: 0.3;
   }
+
   100% {
     transform: rotate(180deg);
     opacity: 0.7;
@@ -113,6 +115,7 @@ body {
   0% {
     transform: scale(1);
   }
+
   100% {
     transform: scale(1.05);
   }
@@ -125,74 +128,193 @@ h1 {
   font-size: 2em;
 }
 
-.rota-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px;
-  margin: 10px 0;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 4px solid #007bff;
+/* SEÇÕES DE BANCOS SIMPLIFICADAS */
+.banco-section {
+  margin-bottom: 30px;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  padding: 20px;
+  background: #fafafa;
 }
 
-.rota-nome {
+.banco-title {
+  font-size: 1.5em;
   font-weight: bold;
-  color: #333;
-  min-width: 200px;
+  color: white;
+  margin-bottom: 15px;
+  text-align: center;
+  padding: 10px;
+  border-radius: 8px;
+  background: #007bff;
+  /* Cor padrão para títulos de banco */
 }
 
-.valores-container {
+/* Cores específicas para títulos de banco */
+.banco-title.banco-2g {
+  background: #ffc107;
+  color: #343a40;
+}
+
+.banco-title.banco-lecca {
+  background: #28a745;
+}
+
+.banco-title.banco-itau {
+  background: #fd7e14;
+}
+
+/* Laranja para Itaú */
+.banco-title.banco-grafeno {
+  background: #6f42c1;
+}
+
+/* Roxo para Grafeno */
+.banco-title.banco-pix {
+  background: #00aced;
+}
+
+/* Azul claro para PIX */
+.banco-title.banco-lecca-mg {
+  background: #17a2b8;
+}
+
+/* Azul turquesa para Lecca-MG */
+
+.banco-content {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 15px;
-  flex: 1;
-  justify-content: flex-end;
 }
 
+.pedido-input-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 5px;
+  border: 1px solid #e9ecef;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-label {
+  font-size: 0.8em;
+  font-weight: bold;
+  color: #666;
+}
+
+.pedido-input,
 .valor-input {
-  width: 120px;
   padding: 8px;
   border: 2px solid #ddd;
   border-radius: 5px;
-  text-align: right;
   font-size: 14px;
+  height: 38px;
 }
 
+.pedido-input {
+  text-align: center;
+}
+
+.valor-input {
+  text-align: right;
+}
+
+.pedido-input:focus,
 .valor-input:focus {
   outline: none;
   border-color: #007bff;
 }
 
-.btn-add-valor {
+.btn-add-pedido {
   background: #28a745;
   color: white;
   border: none;
-  padding: 8px 12px;
+  padding: 0;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 18px;
+  font-weight: bold;
+  height: 38px;
+  width: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-add-valor:hover {
+.btn-add-pedido:hover {
   background: #218838;
 }
 
-.total-rota {
+.pedidos-list {
+  margin-top: 10px;
+}
+
+.pedido-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  margin: 5px 0;
+  background: #e9ecef;
+  border-radius: 5px;
+  font-size: 0.9em;
+}
+
+.pedido-numero {
+  font-weight: bold;
+  color: #495057;
+}
+
+.pedido-valor {
   font-weight: bold;
   color: #007bff;
-  min-width: 120px;
+}
+
+.remove-pedido {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-pedido:hover {
+  background: #c82333;
+}
+
+.total-banco-footer {
+  font-weight: bold;
+  color: #007bff;
   text-align: right;
+  font-size: 1.1em;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 5px;
+  border: 2px solid #007bff;
+  margin-top: 10px;
 }
 
 .total-final {
   background: #007bff;
   color: white;
-  padding: 20px;
+  padding: 25px;
   margin-top: 30px;
   border-radius: 8px;
   text-align: center;
-  font-size: 1.5em;
+  font-size: 1.8em;
   font-weight: bold;
 }
 
@@ -202,13 +324,13 @@ h1 {
   background: #dc3545;
   color: white;
   border: none;
-  padding: 12px 24px;
+  padding: 15px 30px;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
   transition: background 0.3s ease;
-  margin: 5px;
+  margin: 10px;
 }
 
 .export-btn {
@@ -231,37 +353,6 @@ h1 {
   background: #138496;
 }
 
-.valores-list {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-  max-width: 300px;
-}
-
-.valor-tag {
-  background: #e9ecef;
-  padding: 3px 8px;
-  border-radius: 3px;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.remove-valor {
-  background: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  font-size: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* Estilos do Modal de Resumo */
 .modal {
   display: none;
@@ -277,12 +368,12 @@ h1 {
 
 .modal-content {
   background-color: white;
-  margin: 5% auto;
+  margin: 2% auto;
   padding: 30px;
   border-radius: 10px;
-  width: 90%;
-  max-width: 900px;
-  max-height: 80vh;
+  width: 95%;
+  max-width: 1000px;
+  max-height: 90vh;
   overflow-y: auto;
   position: relative;
   animation: slideIn 0.3s ease;
@@ -292,6 +383,7 @@ h1 {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -302,6 +394,7 @@ h1 {
     transform: translateY(-50px);
     opacity: 0;
   }
+
   to {
     transform: translateY(0);
     opacity: 1;
@@ -338,106 +431,170 @@ h1 {
 }
 
 .resumo-title {
-  font-size: 1.8em;
+  font-size: 2em;
   color: #333;
   margin-bottom: 10px;
+  font-weight: bold;
 }
 
 .resumo-subtitle {
   color: #666;
-  font-size: 1em;
+  font-size: 1.1em;
+  font-style: italic;
 }
 
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.stat-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+/* Logo para impressão */
+.logo-print {
+  display: none;
+  text-align: center;
+  margin-bottom: 25px;
   padding: 20px;
+  border: 3px solid #333;
   border-radius: 10px;
-  text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background: #f8f9fa;
 }
 
-.stat-card.green {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.stat-card.orange {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-}
-
-.stat-card.purple {
-  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+.logo-print h2 {
+  font-size: 1.8em;
   color: #333;
-}
-
-.stat-value {
-  font-size: 1.5em;
+  margin-bottom: 8px;
   font-weight: bold;
-  margin-bottom: 5px;
 }
 
-.stat-label {
-  font-size: 0.9em;
-  opacity: 0.9;
+.logo-print p {
+  color: #666;
+  font-size: 1em;
+  font-style: italic;
 }
 
-.rotas-resumo {
-  margin-top: 30px;
+.resumo-secao {
+  margin-bottom: 30px;
+  padding: 20px;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  background: #fafafa;
 }
 
-.rotas-resumo h3 {
+.resumo-secao h3 {
   color: #333;
-  margin-bottom: 20px;
-  font-size: 1.3em;
+  margin-bottom: 15px;
+  font-size: 1.4em;
   text-align: center;
+  padding: 10px;
+  background: #007bff;
+  color: white;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+/* Cores específicas para títulos de banco no resumo */
+.resumo-secao.banco-2g h3 {
+  background: #ffc107;
+  color: #343a40;
+}
+
+.resumo-secao.banco-lecca h3 {
+  background: #28a745;
+}
+
+.resumo-secao.banco-itau h3 {
+  background: #fd7e14;
+}
+
+.resumo-secao.banco-grafeno h3 {
+  background: #6f42c1;
+}
+
+.resumo-secao.banco-pix h3 {
+  background: #00aced;
+}
+
+.resumo-secao.banco-lecca-mg h3 {
+  background: #17a2b8;
 }
 
 .rota-resumo-item {
-  background: #f8f9fa;
+  /* No contexto atual, seria o item de total de banco no resumo */
+  background: white;
   margin: 10px 0;
   padding: 15px;
   border-radius: 8px;
-  border-left: 4px solid #28a745;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  border-left: 4px solid #007bff;
+  /* Cor padrão para itens no resumo */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.rota-resumo-item.destaque {
-  background: #fff3cd;
+/* Bordas específicas para itens no resumo (se aplicável, com base na cor do banco) */
+.resumo-secao.banco-2g .rota-resumo-item {
   border-left-color: #ffc107;
 }
 
-.rota-resumo-info {
-  flex: 1;
+.resumo-secao.banco-lecca .rota-resumo-item {
+  border-left-color: #28a745;
+}
+
+.resumo-secao.banco-itau .rota-resumo-item {
+  border-left-color: #fd7e14;
+}
+
+.resumo-secao.banco-grafeno .rota-resumo-item {
+  border-left-color: #6f42c1;
+}
+
+.resumo-secao.banco-pix .rota-resumo-item {
+  border-left-color: #00aced;
+}
+
+.resumo-secao.banco-lecca-mg .rota-resumo-item {
+  border-left-color: #17a2b8;
 }
 
 .rota-resumo-nome {
   font-weight: bold;
   color: #333;
-  margin-bottom: 5px;
+  font-size: 1.1em;
+  margin-bottom: 10px;
 }
 
-.rota-resumo-detalhes {
+.pedidos-resumo {
+  margin-left: 15px;
+}
+
+.pedido-resumo-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid #eee;
   font-size: 0.9em;
-  color: #666;
 }
 
-.rota-resumo-total {
-  font-size: 1.2em;
+.pedido-resumo-item:last-child {
+  border-bottom: none;
+}
+
+.pedido-resumo-numero {
+  font-weight: bold;
+  color: #495057;
+}
+
+.pedido-resumo-valor {
   font-weight: bold;
   color: #007bff;
 }
 
+.total-rota {
+  /* Usado no resumo para total por "rota" - aqui será o total de pedidos do banco */
+  text-align: right;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #007bff;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 2px solid #007bff;
+}
+
 .total-geral-resumo {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #007bff;
   color: white;
   padding: 25px;
   margin-top: 30px;
@@ -446,11 +603,144 @@ h1 {
 }
 
 .total-geral-resumo h3 {
-  margin-bottom: 10px;
-  font-size: 1.3em;
+  margin-bottom: 15px;
+  font-size: 1.5em;
+  font-weight: bold;
 }
 
 .total-geral-valor {
-  font-size: 2em;
+  font-size: 2.2em;
   font-weight: bold;
+}
+
+/* Estilos para impressão */
+@media print {
+  body {
+    background: white;
+    padding: 0;
+    font-size: 12px;
+  }
+
+  .modal {
+    position: static;
+    background: none;
+    display: block !important;
+  }
+
+  .modal-content {
+    box-shadow: none;
+    margin: 0;
+    max-height: none;
+    overflow: visible;
+    padding: 20px;
+    border-radius: 0;
+  }
+
+  .close-modal,
+  .btn-print-resumo,
+  .export-btn,
+  .resumo-btn,
+  .clear-btn {
+    /* Esconde todos os botões de controle */
+    display: none !important;
+  }
+
+  .resumo-header {
+    display: none;
+  }
+
+  .logo-print {
+    display: block !important;
+  }
+
+  .resumo-secao h3 {
+    background: white !important;
+    color: #333 !important;
+    border: 2px solid #333;
+    font-size: 1.2em;
+  }
+
+  .resumo-secao p {
+    color: #333 !important;
+  }
+
+  .rota-resumo-item {
+    background: white !important;
+    border: 1px solid #ddd;
+    border-left: 4px solid #333 !important;
+    /* Borda preta na impressão */
+    margin: 8px 0;
+    padding: 12px;
+  }
+
+  /* Garantir cores de borda para print conforme o banco */
+  .resumo-secao.banco-2g .rota-resumo-item {
+    border-left-color: #ffc107 !important;
+  }
+
+  .resumo-secao.banco-lecca .rota-resumo-item {
+    border-left-color: #28a745 !important;
+  }
+
+  .resumo-secao.banco-itau .rota-resumo-item {
+    border-left-color: #fd7e14 !important;
+  }
+
+  .resumo-secao.banco-grafeno .rota-resumo-item {
+    border-left-color: #6f42c1 !important;
+  }
+
+  .resumo-secao.banco-pix .rota-resumo-item {
+    border-left-color: #00aced !important;
+  }
+
+  .resumo-secao.banco-lecca-mg .rota-resumo-item {
+    border-left-color: #17a2b8 !important;
+  }
+
+  .total-geral-resumo {
+    background: white !important;
+    color: #333 !important;
+    border: 3px solid #333;
+    margin-top: 20px;
+    padding: 20px;
+  }
+
+  .total-geral-resumo h3,
+  .total-geral-valor {
+    color: #333 !important;
+  }
+
+  .total-geral-valor {
+    font-size: 1.8em;
+  }
+
+  .total-banco-footer,
+  .total-rota {
+    /* Usado no resumo e na tela principal */
+    color: #333 !important;
+    border-top-color: #333 !important;
+    background: white !important;
+    /* Remove background colorido */
+  }
+
+  .total-banco-footer {
+    border: 2px solid #333 !important;
+  }
+
+  .pedido-valor {
+    color: #333 !important;
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .container {
+    padding: 15px;
+  }
+
+  .pedido-input-container {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 }
